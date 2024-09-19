@@ -17,14 +17,45 @@ void ClientManager::connectToServer()
     _socket->connectToHost(_ip, _port);
 }
 
+void ClientManager::sendIsTyping()
+{
+    _socket->write(_protocol.isTypingMessage());
+}
+
 void ClientManager::sendMessage(QString message)
 {
-    _socket->write(message.toUtf8());
+    _socket->write(_protocol.textMessage(message));
+}
+
+void ClientManager::sendName(QString name)
+{
+    _socket->write(_protocol.setNameMessage(name));
+}
+
+void ClientManager::sendStatus(ChatProtocol::Status status)
+{
+    _socket->write(_protocol.setStatusMessage(status));
 }
 
 void ClientManager::readyRead()
 {
     auto data = _socket->readAll();
+    _protocol.loadData(data);
 
-    emit dataReceived(data);
+    switch (_protocol.type()) {
+        case ChatProtocol::Text:
+            emit textMessageReceived(_protocol.message());
+            break;
+        case ChatProtocol::IsTyping:
+            emit isTyping();
+            break;
+        case ChatProtocol::SetName:
+            emit nameChanged(_protocol.name());
+            break;
+        case ChatProtocol::SetStatus:
+            emit statusChanged(_protocol.status());
+            break;
+        default:
+            break;
+    }
 }

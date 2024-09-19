@@ -5,6 +5,8 @@
 
 #include <QTcpSocket>
 
+#include "chatprotocol.h"
+
 class ClientManager : public QObject
 {
     Q_OBJECT
@@ -12,12 +14,20 @@ public:
     explicit ClientManager(QHostAddress ip = QHostAddress::LocalHost, ushort port = 4500, QObject *parent = nullptr);
 
     void connectToServer();
+    void sendIsTyping();
     void sendMessage(QString message);
+    void sendName(QString name);
+    void sendStatus(ChatProtocol::Status status);
 
 signals:
     void connected();
-    void dataReceived(QByteArray data);
+    //void dataReceived(QByteArray data);
     void disconnected();
+    void isTyping();
+    void nameChanged(QString name);
+    void statusChanged(ChatProtocol::Status status);
+    void textMessageReceived(QString message);
+
 
 private slots:
     void readyRead();
@@ -25,6 +35,7 @@ private slots:
 private:
     QHostAddress _ip;
     QTcpSocket *_socket;
+    ChatProtocol _protocol;
     ushort _port;
 };
 

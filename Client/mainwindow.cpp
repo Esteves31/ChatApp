@@ -25,15 +25,18 @@ void MainWindow::on_actionConnect_triggered()
     connect(_client, &ClientManager::disconnected, [this](){
         ui->centralwidget->setEnabled(false);
     });
-    connect(_client, &ClientManager::dataReceived, this, &MainWindow::dataReceived);
+    connect(_client, &ClientManager::textMessageReceived, this, &MainWindow::dataReceived);
+    connect(_client, &ClientManager::nameChanged, this, &MainWindow::setWindowTitle);
+    connect(_client, &ClientManager::isTyping, this, &MainWindow::onTyping);
+    connect(ui->lineMessage, &QLineEdit::textChanged, _client, &ClientManager::sendIsTyping);
 
     _client->connectToServer();
 }
 
-void MainWindow::dataReceived(QByteArray data)
+void MainWindow::dataReceived(QString message)
 {
     auto chatWidget = new ChatItemWidget(this);
-    chatWidget->setMessage(data);
+    chatWidget->setMessage(message);
     auto listWidgetItem = new QListWidgetItem();
     listWidgetItem->setSizeHint(QSize(0, 65));
     ui->listMessages->addItem(listWidgetItem);
@@ -58,4 +61,22 @@ void MainWindow::on_btnSend_clicked()
 void MainWindow::on_actionDisconnect_triggered()
 {
     _client->disconnect();
+}
+
+void MainWindow::on_lineClientName_editingFinished()
+{
+    auto name = ui->lineClientName->text().trimmed();
+    _client->sendName(name);
+}
+
+
+void MainWindow::on_comboStatus_currentIndexChanged(int index)
+{
+    auto status = (ChatProtocol::Status)index;
+    _client->sendStatus(status);
+}
+
+void MainWindow::onTyping()
+{
+    statusBar()->showMessage("Server is typing...", 750);
 }

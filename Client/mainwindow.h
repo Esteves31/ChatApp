@@ -20,10 +20,13 @@ public:
     ~MainWindow();
 
 private slots:
+    void dataReceived(QString message);
+    void onTyping();
     void on_actionConnect_triggered();
     void on_actionDisconnect_triggered();
     void on_btnSend_clicked();
-    void dataReceived(QByteArray data);
+    void on_lineClientName_editingFinished();
+    void on_comboStatus_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;
