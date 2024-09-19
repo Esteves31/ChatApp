@@ -5,6 +5,7 @@
 
 #include <QTcpSocket>
 
+#include "chatprotocol.h"
 #include "ServerManager.h"
 
 QT_BEGIN_NAMESPACE
@@ -24,6 +25,8 @@ public:
 private slots:
     void newClientConnected(QTcpSocket *client);
     void clientDisconneted(QTcpSocket *client);
+    void setClientName(QString name);
+    void setClientStatus(ChatProtocol::Status status);
 
 private:
     ServerManager *_server;
